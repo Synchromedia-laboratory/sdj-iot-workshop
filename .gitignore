@@ -203,6 +203,27 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Local IoT stack files
+.env
+.env.*
+!.env.example
+*.local
+data/
+
+# Local editor metadata
+.idea/
+.vscode/
+
 # Ruff stuff:
 .ruff_cache/
 
