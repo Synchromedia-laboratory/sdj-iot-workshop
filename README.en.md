@@ -1,24 +1,27 @@
-# Workshop IoT: MQTT, InfluxDB, Telegraf, and Grafana
+# Workshop IoT: Design Your First IoT Platform
 
 [Back to main README](README.md)
 
+**Workshop 1 - Design Your First IoT Platform**
+
+## Workshop Overview
+
 In an IoT system, sensors generate measurements (temperature, humidity, pressure, etc.) that need to be transmitted, collected, stored, and visualized. In this workshop, we use four widely adopted tools to build this pipeline: MQTT, Telegraf, InfluxDB, and Grafana (IoT). 
 
-A detailed description of each component can be found below in the README.
-
+A detailed description of each component can be found below in the README (**The IoT Stack Section**).
 
 ## Objectives
 
 By the end, students can:
 
-- Start a local IoT stack with Docker Compose or Podman Compose.
+- Start a local IoT stack with Podman Compose or Docker Compose.
 - Publish sensor-like data to an MQTT topic.
 - Verify that the data is stored in InfluxDB.
 - Build a basic Grafana dashboard.
 
 ##  The IoT Stack
 
-### MQTT (Mosquitto) - IoT Data Transport
+### MQTT (Mosquitto) - IoT data transport
 
 MQTT is a lightweight communication protocol widely used in IoT. It uses the publish/subscribe model:
 
@@ -72,11 +75,22 @@ InfluxDB database: iot
 Grafana dashboard
 ```
 
-![IoT stack architecture](docs/images/architecture.jpeg)
+### Simplified Architecture
+
+![Simplified IoT stack architecture](docs/images/simplified-architecture.png)
+
+### Detailed Architecture
+
+![Detailed IoT stack architecture](docs/images/detailed-architecture.png)
+
+### Real Sensor IoT Architecture
+
+![Real sensor IoT architecture](docs/images/real-sensors-iot-architecture.png)
 
 ### Component Roles
 
 - MQTT: receives sensor messages on topics such as `temp`, `humidity`, and `pressure`.
+- MQTT client: provides `mosquitto_pub` and `mosquitto_sub` inside the Compose stack, so students do not need to install MQTT tools locally.
 - Telegraf: subscribes to MQTT topics and forwards numeric values to InfluxDB.
 - InfluxDB: stores the sensor values as time-series data.
 - Grafana: queries InfluxDB and displays dashboards.
@@ -84,7 +98,7 @@ Grafana dashboard
 
 ## Files
 
-- `docker-compose.yml`: starts Mosquitto, InfluxDB, Telegraf, and Grafana.
+- `compose.yaml`: starts Mosquitto, the MQTT client helper, InfluxDB, Telegraf, and Grafana.
 - `config/mosquitto/mosquitto.conf`: allows local anonymous MQTT connections for the atelier.
 - `config/telegraf/telegraf.conf`: subscribes to MQTT topics `temp`, `humidity`, and `pressure`, then writes values to InfluxDB.
 - `grafana/dashboards/iot-dashboard.json`: ready-made dashboard that students can import into Grafana.
@@ -94,27 +108,18 @@ Grafana dashboard
 
 ## Prerequisites
 
-Install one container runtime:
+Choose one container runtime before starting the workshop:
 
-- Docker Desktop with Docker Compose, or
-- Podman Desktop with Podman Compose.
+- Podman Desktop with Podman Compose, or
+- Docker Desktop with Docker Compose.
 
 Useful installation links:
 
-- Docker Desktop: <https://docs.docker.com/desktop/>
-- Docker Compose: <https://docs.docker.com/compose/install/>
 - Podman Desktop: <https://podman.io/docs/installation>
 - Podman Compose: <https://podman-desktop.io/docs/compose/setting-up-compose>
+- Docker Desktop: <https://docs.docker.com/desktop/>
+- Docker Compose: <https://docs.docker.com/compose/install/>
 - Optional, Visual Studio Code: <https://code.visualstudio.com/download>
-
-### Docker Option
-
-Install Docker Desktop, then check:
-
-```bash
-docker compose version
-```
-
 
 ### Podman Option
 
@@ -144,37 +149,57 @@ podman info
 podman-compose --version
 ```
 
-### MQTT Client Tools
+On Windows:
 
-Install MQTT client tools for the test commands:
+1. Install Podman Desktop for Windows.
+2. Follow the Podman Desktop Compose setup guide linked above.
+3. Open PowerShell, Windows Terminal, or the VS Code terminal.
+4. Run the same Podman commands shown in this workshop.
 
-```bash
-# macOS
-brew install mosquitto
+Check Podman from PowerShell:
 
-# Ubuntu/Debian
-sudo apt update
-sudo apt install mosquitto-clients
+```powershell
+podman info
+podman-compose --version
 ```
 
-If you do not want to install `mosquitto_pub` locally, you can use the Mosquitto container shown in Step 2.
+### Docker Option
 
-## Step 1: Start The Stack
+Install Docker Desktop, then check:
+
+```bash
+docker compose version
+```
+
+On Windows:
+
+1. Install Docker Desktop for Windows.
+2. Use the WSL 2 backend when Docker Desktop asks for the engine.
+3. Open PowerShell, Windows Terminal, or the VS Code terminal.
+4. Run the same Docker Compose commands shown in this workshop.
+
+Check Docker from PowerShell:
+
+```powershell
+docker compose version
+docker version
+```
+
+### MQTT Client Tools
+
+No local MQTT client installation is required. The Compose stack includes an `mqtt-client` container based on the Mosquitto image, so `mosquitto_pub` and `mosquitto_sub` are available through Podman Compose or Docker Compose on macOS, Windows, and Linux.
+
+## Option A: Podman Compose
+
+### Step 1: Start The Stack
 
 From this folder:
 
 ```bash
-chmod +x scripts/setup.sh
-./scripts/setup.sh
+podman-compose up -d
 ```
 
 Check that the containers are running:
-
-```bash
-docker compose ps
-```
-
-If you use Podman Compose:
 
 ```bash
 podman-compose ps
@@ -182,7 +207,8 @@ podman-compose ps
 
 Expected services:
 
-- `mqtt`
+- `mqtt-broker`
+- `mqtt-client`
 - `influxdb`
 - `telegraf`
 - `grafana`
@@ -195,74 +221,36 @@ If the stack was already running before changing `config/telegraf/telegraf.conf`
 podman-compose up -d --force-recreate telegraf
 ```
 
-## Step 2: Publish MQTT Data
+### Step 2: Publish MQTT Data
 
-Option A: send one temperature value with a local MQTT client:
+Send one temperature value with the MQTT client container:
 
 ```bash
-mosquitto_pub -h localhost -p 1883 -t temp -m "25"
+podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"
 ```
 
 Send several values:
 
 ```bash
-mosquitto_pub -h localhost -p 1883 -t temp -m "22.5"
-mosquitto_pub -h localhost -p 1883 -t humidity -m "58"
-mosquitto_pub -h localhost -p 1883 -t pressure -m "1013"
+podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "22.5"
+podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
+podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"
 ```
 
-Option B: send one value from a temporary Podman container:
+Optional: subscribe in another terminal to observe messages:
 
 ```bash
-podman run --rm --network sdj-iot-workshop_default docker.io/eclipse-mosquitto:2 mosquitto_pub -h mqtt -p 1883 -t temp -m "25"
-```
-
-Option C: send one value from inside the running MQTT container:
-
-```bash
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t temp -m "25"
-```
-
-Send all three sensor values from inside the running MQTT container:
-
-```bash
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t temp -m "25"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t humidity -m "58"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t pressure -m "1013"
-```
-
-Option D: send one value from a temporary Docker container:
-
-```bash
-docker run --rm --network sdj-iot-workshop_default eclipse-mosquitto:2 mosquitto_pub -h mqtt -p 1883 -t temp -m "25"
-```
-
-Optional: subscribe in another terminal to observe messages with a local MQTT client:
-
-```bash
-mosquitto_sub -h localhost -p 1883 -t temp
-```
-
-Or subscribe with Podman:
-
-```bash
-podman run --rm --network sdj-iot-workshop_default docker.io/eclipse-mosquitto:2 mosquitto_sub -h mqtt -p 1883 -t temp
+podman-compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp
 ```
 
 After publishing a value, Telegraf should write it to InfluxDB within a few seconds.
 
-## Step 3: Verify InfluxDB
+### Step 3: Verify InfluxDB
 
 Open the InfluxDB shell:
 
 ```bash
-docker exec -it influxdb influx
-```
-
-If you use Podman:
-
-```bash
-podman exec -it influxdb influx
+podman-compose exec influxdb influx
 ```
 
 Run:
@@ -284,7 +272,91 @@ exit
 You can also run the check in one command:
 
 ```bash
-podman exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
+podman-compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
+```
+
+## Option B: Docker Compose
+
+### Step 1: Start The Stack
+
+From this folder:
+
+```bash
+docker compose up -d
+```
+
+Check that the containers are running:
+
+```bash
+docker compose ps
+```
+
+Expected services:
+
+- `mqtt-broker`
+- `mqtt-client`
+- `influxdb`
+- `telegraf`
+- `grafana`
+
+If the stack was already running before changing `config/telegraf/telegraf.conf`, recreate Telegraf so it loads the new topics:
+
+```bash
+docker compose up -d --force-recreate telegraf
+```
+
+### Step 2: Publish MQTT Data
+
+Send one temperature value with the MQTT client container:
+
+```bash
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"
+```
+
+Send several values:
+
+```bash
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "22.5"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"
+```
+
+Optional: subscribe in another terminal to observe messages:
+
+```bash
+docker compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp
+```
+
+After publishing a value, Telegraf should write it to InfluxDB within a few seconds.
+
+### Step 3: Verify InfluxDB
+
+Open the InfluxDB shell:
+
+```bash
+docker compose exec influxdb influx
+```
+
+Run:
+
+```sql
+USE iot
+SHOW MEASUREMENTS
+SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 5
+```
+
+You should see the values published to the MQTT topics `temp`, `humidity`, and `pressure`.
+
+Exit the shell:
+
+```sql
+exit
+```
+
+You can also run the check in one command:
+
+```bash
+docker compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
 ```
 
 ## Step 4: Configure Grafana
@@ -377,18 +449,19 @@ Publish new MQTT values and refresh the dashboard.
 ## Step 6: Stop The Stack
 
 ```bash
-docker compose down
+podman-compose down
 ```
 
-If you use Podman Compose:
+If you use Docker Compose:
 
 ```bash
-podman-compose down
+docker compose down
 ```
 
 To remove stored data as well:
 
 ```bash
+podman-compose down -v
 docker compose down -v
 ```
 
@@ -412,7 +485,8 @@ podman-compose ps
 
 Expected services:
 
-- `mqtt`
+- `mqtt-broker`
+- `mqtt-client`
 - `influxdb`
 - `telegraf`
 - `grafana`
@@ -420,7 +494,7 @@ Expected services:
 If `telegraf` is stopped, check its logs:
 
 ```bash
-podman logs telegraf
+docker compose logs telegraf
 ```
 
 ### 2. Confirm That MQTT Messages Reach The Sensor Topics
@@ -428,15 +502,15 @@ podman logs telegraf
 Open one terminal and subscribe to all MQTT topics:
 
 ```bash
-podman exec -it mqtt mosquitto_sub -h localhost -p 1883 -t '#' -v
+docker compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t '#' -v
 ```
 
 Open another terminal and publish values:
 
 ```bash
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t temp -m "25"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t humidity -m "58"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t pressure -m "1013"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"
 ```
 
 Expected output in the subscriber terminal:
@@ -479,15 +553,15 @@ temperature=25
 Publish a valid test value:
 
 ```bash
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t temp -m "25.5"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t humidity -m "58"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t pressure -m "1013"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25.5"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"
 ```
 
 ### 4. Confirm That InfluxDB Has Data
 
 ```bash
-podman exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
+docker compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
 ```
 
 Expected output contains rows with a `value` column:
@@ -504,16 +578,16 @@ time                topic value
 If there is no data, restart Telegraf and publish again:
 
 ```bash
-podman restart telegraf
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t temp -m "26"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t humidity -m "60"
-podman exec mqtt mosquitto_pub -h localhost -p 1883 -t pressure -m "1012"
+docker compose restart telegraf
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "26"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "60"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1012"
 ```
 
 Then check InfluxDB again:
 
 ```bash
-podman exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
+docker compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'
 ```
 
 ### 5. Check Telegraf Logs
@@ -521,13 +595,13 @@ podman exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer 
 With Docker:
 
 ```bash
-docker logs telegraf
+docker compose logs telegraf
 ```
 
 With Podman:
 
 ```bash
-podman logs telegraf
+podman-compose logs telegraf
 ```
 
 If Telegraf logs show this Podman error:
@@ -536,7 +610,7 @@ If Telegraf logs show this Podman error:
 setpriv: failed to execute telegraf: Operation not permitted
 ```
 
-Make sure the `telegraf` service in `docker-compose.yml` contains:
+Make sure the `telegraf` service in `compose.yaml` contains:
 
 ```yaml
 user: telegraf
@@ -586,7 +660,7 @@ If Explore shows data but the dashboard does not, re-import `grafana/dashboards/
 
 ### 8. Check Port Conflicts
 
-If ports are already used, stop the conflicting service or change these ports in `docker-compose.yml`:
+If ports are already used, stop the conflicting service or change these ports in `compose.yaml`:
 
 - MQTT: `1883`
 - InfluxDB: `8086`
@@ -615,3 +689,23 @@ or:
 ```bash
 podman-compose up -d
 ```
+
+## Command Line Summary
+
+| Task | Podman Compose | Docker Compose |
+| --- | --- | --- |
+| Start the stack | `podman-compose up -d` | `docker compose up -d` |
+| Check containers | `podman-compose ps` | `docker compose ps` |
+| Publish temperature | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"` |
+| Publish humidity | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"` |
+| Publish pressure | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t pressure -m "1013"` |
+| Subscribe to a topic | `podman-compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp` | `docker compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp` |
+| Query InfluxDB | `podman-compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'` | `docker compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'` |
+| Recreate Telegraf | `podman-compose up -d --force-recreate telegraf` | `docker compose up -d --force-recreate telegraf` |
+| View Telegraf logs | `podman-compose logs telegraf` | `docker compose logs telegraf` |
+| Stop the stack | `podman-compose down` | `docker compose down` |
+| Stop and remove data | `podman-compose down -v` | `docker compose down -v` |
+
+## Optional: Node-RED Extension
+
+![Node-RED IoT architecture](docs/images/architecture-nodered.jpeg)
