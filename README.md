@@ -1,2 +1,12 @@
-# sdj-iot-workshop
-Workshop SDJ – Construction d’une plateforme IoT complète avec MQTT, Telegraf, InfluxDB et Grafana pour la collecte, le stockage et la visualisation en temps réel des données de température, humidité et pression.
+# SDJ IoT Workshop
+
+Workshop SDJ for building a complete local IoT monitoring stack with MQTT, Telegraf, InfluxDB, and Grafana.
+
+Choose a language:
+
+- [English README](README.en.md)
+- [README en francais](README.fr.md)
+
+## Architecture
+
+![IoT stack architecture](docs/images/architecture.jpeg)
