@@ -12,6 +12,8 @@ services:
     container_name: mqtt-client
     depends_on:
       - mqtt-broker
+    volumes:
+      - ./scripts/publish-sensor-data.sh:/usr/local/bin/publish-sensor-data:ro
     entrypoint: ["/bin/sh", "-c", "tail -f /dev/null"]
 
   influxdb:
