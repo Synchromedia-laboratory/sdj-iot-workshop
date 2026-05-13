@@ -41,6 +41,6 @@ Plus d’information : <https://sdginnovnetwk.com/fr/>
 
 ## Contributors
 
-- Professeur [Lokman Sboui](https://www.etsmtl.ca/etudier-a-lets/corps-enseignant/lsboui), Département de génie des systèmes, École de technologie supérieure (ÉTS).
-- Chargée de cours [Saida Khazri](http://www.synchromedia.ca/fr), Département des enseignements généraux, École de technologie supérieure (ÉTS), and Coordonnatrice du laboratoire Synchromedia [SYNCHROMÉDIA](http://www.synchromedia.ca/fr)
-- Saif Eddine Baklouti, Développeur Full Stack  et passionné par l’électronique et les systèmes embarqués. Il a contribué à la mise en place des capteurs réels pour la phase 2.
+- [Lokman Sboui](https://www.etsmtl.ca/etudier-a-lets/corps-enseignant/lsboui), Professeur, Département de génie des systèmes, École de technologie supérieure (ÉTS).
+- [Saida Khazri](http://www.synchromedia.ca/fr), Chargée de cours, Département des enseignements généraux, École de technologie supérieure (ÉTS), et Coordonnatrice du laboratoire Synchromedia [SYNCHROMÉDIA](http://www.synchromedia.ca/fr).
+- [Saif Eddine Baklouti](https://www.linkedin.com/in/saif-eddine-baklouti/), Développeur Full Stack et passionné par l’électronique et les systèmes embarqués. Il a contribué à la mise en place des capteurs réels pour la phase 2.
