@@ -4,6 +4,21 @@
 
 Workshop for building a complete local IoT monitoring stack with MQTT, Telegraf, InfluxDB, and Grafana.
 
+## Language
+
+Choose a language:
+
+- [Workshop Instructions in English](README.en.md)
+- [Workshop Instructions en francais](README.fr.md)
+
+## Workshop Flow
+
+The workshop is structured in two phases.
+
+**Phase 1 - Simulation** focuses on building the full IoT architecture using containerized services on a local environment.
+
+**Phase 2 - Real Deployment** extends this setup by integrating a Raspberry Pi with real sensors and a locally hosted MQTT broker.
+
 ## Workshop Context
 
 This workshop is prepared for the 7th Summer School of the SDG Innovation Network and takes place on 13 mai 2026, from 13 h to 16 h.
@@ -24,14 +39,8 @@ Au sein du réseau, près de 300 professeurs collaborent à des projets qui int�
 
 Plus d’information : <https://sdginnovnetwk.com/fr/>
 
-## Language
-
-Choose a language:
-
-- [English README](README.en.md)
-- [README en francais](README.fr.md)
-
-## Presenters
+## Contributors
 
 - Professeur [Lokman Sboui](https://www.etsmtl.ca/etudier-a-lets/corps-enseignant/lsboui), Département de génie des systèmes, École de technologie supérieure (ÉTS).
 - Chargée de cours [Saida Khazri](http://www.synchromedia.ca/fr), Département des enseignements généraux, École de technologie supérieure (ÉTS), and Coordonnatrice du laboratoire Synchromedia [SYNCHROMÉDIA](http://www.synchromedia.ca/fr)
+- Saif Eddine Baklouti, Développeur Full Stack  et passionné par l’électronique et les systèmes embarqués. Il a contribué à la mise en place des capteurs réels pour la phase 2.
