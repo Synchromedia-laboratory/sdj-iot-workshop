@@ -16,13 +16,13 @@ i=1
 while [ "$i" -le "$ROUNDS" ]; do
   temp=$((22 + i % 6))
   humidity=$((55 + i % 12))
-  pressure=$((1010 + i % 9))
+  distance=$((20 + i % 80))
 
   mosquitto_pub -h "$HOST" -p "$PORT" -t temp -m "$temp"
   mosquitto_pub -h "$HOST" -p "$PORT" -t humidity -m "$humidity"
-  mosquitto_pub -h "$HOST" -p "$PORT" -t pressure -m "$pressure"
+  mosquitto_pub -h "$HOST" -p "$PORT" -t distance -m "$distance"
 
-  echo "Round $i/$ROUNDS: temp=$temp humidity=$humidity pressure=$pressure"
+  echo "Round $i/$ROUNDS: temp=$temp humidity=$humidity distance=$distance"
   i=$((i + 1))
   sleep 1
 done
