@@ -136,9 +136,45 @@ Choisissez un environnement de conteneurs avant de commencer l’atelier :
 - Podman Desktop avec Podman Compose, ou
 - Docker Desktop avec Docker Compose.
 
+Références d’installation :
+
+- Podman Desktop : <https://podman.io/docs/installation>
+- Configuration de Podman Compose : <https://podman-desktop.io/docs/compose/setting-up-compose>
+- Docker Desktop : <https://docs.docker.com/desktop/>
+- Docker Compose : <https://docs.docker.com/compose/install/>
+
 Outil optionnel :
 
 - Visual Studio Code : <https://code.visualstudio.com/download>
+
+## Comparaison entre Docker et Podman
+
+Cet atelier peut être exécuté avec Podman Compose ou Docker Compose.
+
+Vous avez besoin d’une seule de ces options. Les commandes sont légèrement différentes, mais les deux options utilisent le même fichier `compose.yaml` et démarrent les mêmes services IoT.
+
+![Comparaison entre Docker et Podman pour l’atelier IoT](docs/images/docker-podman-comparison.svg)
+
+| Sujet | Podman | Docker |
+| --- | --- | --- |
+| Application Desktop | Podman Desktop | Docker Desktop |
+| Commande Compose | `podman-compose` | `docker compose` |
+| Commande de démarrage | `podman-compose up -d` | `docker compose up -d` |
+| Type de moteur | Conçu pour fonctionner sans privilèges root | Basé sur le daemon Docker |
+| Meilleur choix pour cet atelier | Recommandé si vous commencez de zéro | À utiliser si Docker est déjà installé |
+
+Les instructions de l’atelier présentent Podman en premier, puis Docker. Choisissez une option et gardez le même style de commandes pour le reste de l’atelier.
+
+### Pourquoi Podman est recommandé
+
+Podman est recommandé pour cet atelier, car il convient mieux aux environnements académiques et d’entreprise partagés :
+
+- Fonctionnement sans privilèges root par défaut : les conteneurs s’exécutent avec votre utilisateur, sans daemon root.
+- Meilleure adaptation aux machines partagées entre plusieurs utilisateurs.
+- Réduction du risque opérationnel dans les environnements académiques et d’entreprise.
+- Docker peut être restreint ou interdit par les politiques de certaines universités et entreprises.
+
+Podman conserve un workflow proche de Docker, incluant `run`, `build`, les Dockerfiles et les images Docker Hub, tout en respectant les exigences de sécurité des serveurs partagés.
 
 ### Option A : Exécuter la pile IoT avec Podman
 
@@ -749,8 +785,6 @@ Rafraîchissez ensuite Grafana pour voir les données réelles en direct.
 
 Le tableau de bord devrait afficher les données en direct extraites des capteurs réels à travers la chaîne Raspberry Pi et MQTT.
 
-![Tableau de bord Grafana avec données de température et d’humidité](docs/images/grafana-real-sensor-1.png)
-
 ![Tableau de bord Grafana avec température, humidité, distance et détection d’objet](docs/images/grafana-real-sensor-2.png)
 
 ## Étape 7 : Arrêter la pile
@@ -1016,4 +1050,46 @@ podman-compose up -d
 
 ## Optionnel : Extension avec Node-RED
 
+Node-RED est un outil optionnel de programmation visuelle pour les workflows IoT.
+
+Il permet de construire des flux en connectant des nœuds, sans écrire une application complète à partir de zéro. Dans cet atelier, Node-RED peut être ajouté après la mise en place de la chaîne principale MQTT, Telegraf, InfluxDB et Grafana. Il n’est pas requis pour la phase 1 ni pour la phase 2, mais il permet de montrer comment une plateforme IoT peut être étendue.
+
+Par exemple, Node-RED peut :
+
+- Recevoir des données MQTT.
+- Transformer un message.
+- Filtrer des valeurs.
+- Envoyer des données vers un autre service.
+- Afficher les valeurs dans un petit tableau de bord.
+
 ![Architecture IoT avec Node-RED](docs/images/architecture-nodered.jpeg)
+
+![Exemple de flux MQTT dans Node-RED](docs/images/nodered-flow-example.svg)
+
+Node-RED peut se connecter au broker MQTT et s’abonner aux mêmes topics que ceux utilisés dans l’atelier :
+
+- `temp`
+- `humidity`
+- `distance`
+
+Activités possibles avec Node-RED :
+
+- S’abonner aux topics MQTT des capteurs et afficher les dernières valeurs.
+- Ajouter une logique simple, par exemple vérifier si la distance est sous un seuil.
+- Transformer les messages avant de les envoyer vers un autre service.
+- Créer un tableau de bord léger pour une supervision rapide.
+- Transférer certains messages MQTT vers une autre API ou un service de notification.
+
+Exemple de flux :
+
+```text
+Entrée MQTT -> nœud function -> nœud debug
+```
+
+Pour un flux avec tableau de bord :
+
+```text
+Entrée MQTT -> nœud gauge/chart -> tableau de bord Node-RED
+```
+
+Utilisez Node-RED seulement lorsque le tableau de bord Grafana principal fonctionne. Grafana reste l’outil principal de visualisation de l’atelier ; Node-RED est une extension pour l’automatisation visuelle et le prototypage rapide.

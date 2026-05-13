@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Docker and Podman comparison for the IoT workshop</title>
+  <desc id="desc">Both Docker Compose and Podman Compose run the same IoT services from compose.yaml: Mosquitto, MQTT client, Telegraf, InfluxDB, and Grafana.</desc>
+  <rect width="1200" height="520" fill="#f7f8fb"/>
+  <text x="600" y="54" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#18212f">Same workshop stack, two runtime options</text>
+  <text x="600" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#506070">Choose one tool. Both use the same compose.yaml and start the same IoT services.</text>
+
+  <rect x="70" y="130" width="460" height="260" rx="14" fill="#ffffff" stroke="#cfd8e3" stroke-width="2"/>
+  <text x="300" y="174" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1b5f9e">Podman</text>
+  <text x="110" y="222" font-family="Arial, sans-serif" font-size="18" fill="#263447">Rootless-first container engine</text>
+  <text x="110" y="260" font-family="Arial, sans-serif" font-size="18" fill="#263447">Works with Podman Desktop</text>
+  <text x="110" y="298" font-family="Arial, sans-serif" font-size="18" fill="#263447">Command: podman-compose up -d</text>
+  <text x="110" y="336" font-family="Arial, sans-serif" font-size="18" fill="#263447">Recommended option for this workshop</text>
+
+  <rect x="670" y="130" width="460" height="260" rx="14" fill="#ffffff" stroke="#cfd8e3" stroke-width="2"/>
+  <text x="900" y="174" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#166b5f">Docker</text>
+  <text x="710" y="222" font-family="Arial, sans-serif" font-size="18" fill="#263447">Widely used container engine</text>
+  <text x="710" y="260" font-family="Arial, sans-serif" font-size="18" fill="#263447">Works with Docker Desktop</text>
+  <text x="710" y="298" font-family="Arial, sans-serif" font-size="18" fill="#263447">Command: docker compose up -d</text>
+  <text x="710" y="336" font-family="Arial, sans-serif" font-size="18" fill="#263447">Alternative option if Docker is already installed</text>
+
+  <rect x="315" y="430" width="570" height="56" rx="10" fill="#18212f"/>
+  <text x="600" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#ffffff">Mosquitto + MQTT client + Telegraf + InfluxDB + Grafana</text>
+  <path d="M530 260 C590 260 610 260 670 260" fill="none" stroke="#68778d" stroke-width="3"/>
+  <polygon points="660,250 682,260 660,270" fill="#68778d"/>
+</svg>

@@ -122,9 +122,45 @@ Choose one container runtime before starting the workshop:
 - Podman Desktop with Podman Compose, or
 - Docker Desktop with Docker Compose.
 
+Installation references:
+
+- Podman Desktop: <https://podman.io/docs/installation>
+- Podman Compose setup: <https://podman-desktop.io/docs/compose/setting-up-compose>
+- Docker Desktop: <https://docs.docker.com/desktop/>
+- Docker Compose: <https://docs.docker.com/compose/install/>
+
 Optional tool:
 
 - Visual Studio Code: <https://code.visualstudio.com/download>
+
+## Docker and Podman comparison
+
+This workshop can run with either Podman Compose or Docker Compose.
+
+You only need one of them. The commands are slightly different, but both options use the same `compose.yaml` file and start the same IoT services.
+
+![Docker and Podman comparison for the IoT workshop](docs/images/docker-podman-comparison.svg)
+
+| Topic | Podman | Docker |
+| --- | --- | --- |
+| Desktop application | Podman Desktop | Docker Desktop |
+| Compose command | `podman-compose` | `docker compose` |
+| Start command | `podman-compose up -d` | `docker compose up -d` |
+| Container engine style | Rootless-first by design | Docker daemon-based |
+| Best choice for this workshop | Recommended if you are starting fresh | Use it if Docker is already installed |
+
+The workshop instructions show Podman first, then Docker. Pick one option and keep the same command style for the rest of the workshop.
+
+### Why Podman is recommended
+
+Podman is recommended for this workshop because it is a better fit for shared academic and enterprise environments:
+
+- Rootless by default: containers run as your user, without a root daemon.
+- Better fit for shared multi-user machines.
+- Lower operational risk in academic and enterprise environments because containers do not require a root daemon.
+- Docker may be restricted or forbidden by policy in some universities and companies.
+
+Podman keeps a Docker-like workflow, including `run`, `build`, Dockerfiles, and Docker Hub images, while matching shared-server security requirements.
 
 ### Option A: Run the IoT stack with Podman
 
@@ -1000,4 +1036,46 @@ podman-compose up -d
 
 ## Optional: Node-RED extension
 
+Node-RED is an optional visual programming tool for IoT workflows.
+
+It lets you build flows by connecting nodes instead of writing a full application from scratch. In this workshop, Node-RED can be added after the main MQTT, Telegraf, InfluxDB, and Grafana pipeline is working. It is not required for Phase 1 or Phase 2, but it is useful to demonstrate how an IoT platform can be extended.
+
+For example, Node-RED can:
+
+- Receive MQTT data.
+- Transform a message.
+- Filter values.
+- Send data to another service.
+- Show values on a small dashboard.
+
 ![Node-RED IoT architecture](docs/images/architecture-nodered.jpeg)
+
+![Node-RED MQTT flow example](docs/images/nodered-flow-example.svg)
+
+Node-RED can connect to the MQTT broker and subscribe to the same topics used in the workshop:
+
+- `temp`
+- `humidity`
+- `distance`
+
+Possible Node-RED activities:
+
+- Subscribe to MQTT sensor topics and display the latest values.
+- Add simple logic, such as checking whether distance is below a threshold.
+- Transform messages before sending them to another service.
+- Create a lightweight dashboard for quick monitoring.
+- Forward selected MQTT messages to another API or notification service.
+
+Example flow idea:
+
+```text
+MQTT input -> function node -> debug node
+```
+
+For a dashboard flow:
+
+```text
+MQTT input -> gauge/chart node -> Node-RED dashboard
+```
+
+Use Node-RED only after the main Grafana dashboard is working. Grafana remains the main visualization tool for the workshop; Node-RED is an extension for visual automation and rapid prototyping.
