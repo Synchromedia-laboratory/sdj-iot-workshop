@@ -357,6 +357,10 @@ The script publishes repeated values and the dashboard updates as data arrives:
 
 ![MQTT publishing script with Podman Compose](docs/images/publish-mqtt-method-2-script.png)
 
+You can also run the script from the `mqtt-client` terminal in Podman Desktop:
+
+![Podman Desktop mqtt-client terminal running the publishing script](docs/images/podman-desktop-mqtt-client-script.png)
+
 Optional: subscribe in another terminal to observe messages:
 
 ```bash
@@ -384,6 +388,10 @@ SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 5
 You should see the values published to the MQTT topics `temp`, `humidity`, and `distance`.
 
 ![InfluxDB query showing MQTT sensor data](docs/images/verify-influxdb-mqtt-data.png)
+
+The same check can also be run from the `influxdb` terminal in Podman Desktop:
+
+![Podman Desktop InfluxDB terminal showing MQTT sensor data](docs/images/podman-desktop-influxdb-query.png)
 
 Exit the shell:
 
