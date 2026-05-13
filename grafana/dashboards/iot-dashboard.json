@@ -164,6 +164,17 @@
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series"
+        },
+        {
+          "alias": "Object detected",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "SELECT mean(\"value\") FROM \"mqtt_consumer\" WHERE (\"topic\" = 'object') AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series"
         }
       ],
       "title": "Sensor Values Over Time",

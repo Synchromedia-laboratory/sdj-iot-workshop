@@ -16,7 +16,7 @@ By the end, students can:
 
 - Explain the role of MQTT, Telegraf, InfluxDB, and Grafana in an IoT data pipeline.
 - Start a local containerized IoT stack with Podman Compose or Docker Compose.
-- Publish simulated temperature, humidity, and distance data to MQTT topics.
+- Publish simulated temperature, humidity, distance, and object detection data to MQTT topics.
 - Verify that MQTT data is collected by Telegraf and stored in InfluxDB.
 - Visualize live and historical sensor data in Grafana.
 - Understand how the simulated setup can be extended to real sensors using a Raspberry Pi.
@@ -50,11 +50,22 @@ During Phase 2, students switch Telegraf to the real-sensor configuration so it 
 
 ### MQTT (Mosquitto) - IoT data transport
 
-MQTT is a lightweight communication protocol widely used in IoT. It uses the publish/subscribe model:
+MQTT (Message Queuing Telemetry Transport) is a lightweight messaging protocol designed for low-bandwidth, high-latency, or unreliable networks. It is widely used in IoT systems.
 
-- Sensors, or our Python simulator, publish messages to a topic, for example `sensors/temperature`.
-- Other applications subscribe to that topic to receive the messages.
-- Mosquitto is the MQTT broker: it is the server that receives messages and redistributes them to subscribers.
+MQTT works with a publish/subscribe model instead of direct communication:
+
+- Publisher: sends messages.
+- Subscriber: receives messages.
+- Broker: central server that routes messages.
+
+How it works:
+
+1. Devices connect to an MQTT broker.
+2. A device publishes data to a topic, for example `home/temperature`.
+3. Other devices or applications subscribe to that topic.
+4. The broker forwards messages to all subscribers.
+
+In this workshop, sensors or the MQTT client publish messages to topics such as `temp`, `humidity`, `distance`, and `object`. Mosquitto is the MQTT broker.
 
 ### InfluxDB - Time-series storage
 
@@ -62,7 +73,7 @@ IoT measurements arrive as data that changes over time: a value associated with 
 
 In this workshop, InfluxDB is used to:
 
-- Store measurements such as temperature, humidity, and distance.
+- Store measurements such as temperature, humidity, distance, and object detection.
 - Keep a history of values.
 - Support queries such as averages, maximums, and trend analysis.
 
@@ -96,7 +107,7 @@ This workshop follows the complete monitoring flow:
 
 ### Component roles
 
-- MQTT: receives sensor messages on topics such as `temp`, `humidity`, and `distance`.
+- MQTT: receives sensor messages on topics such as `temp`, `humidity`, `distance`, and `object`.
 - MQTT client: provides `mosquitto_pub` and `mosquitto_sub` inside the Compose stack, so students do not need to install MQTT tools locally.
 - Telegraf: subscribes to MQTT topics and forwards numeric values to InfluxDB.
 - InfluxDB: stores the sensor values as time-series data.
@@ -107,12 +118,12 @@ This workshop follows the complete monitoring flow:
 
 - `compose.yaml`: starts Mosquitto, the MQTT client helper, InfluxDB, Telegraf, and Grafana.
 - `config/mosquitto/mosquitto.conf`: allows local anonymous MQTT connections for the atelier.
-- `config/telegraf/telegraf.conf`: subscribes to MQTT topics `temp`, `humidity`, and `distance`, then writes values to InfluxDB.
+- `config/telegraf/telegraf.conf`: subscribes to MQTT topics `temp`, `humidity`, `distance`, and `object`, then writes values to InfluxDB.
 - `config/telegraf/telegraf-real-sensors.conf`: Phase 2 Telegraf configuration for MQTT data published by the Raspberry Pi.
 - `grafana/dashboards/iot-dashboard.json`: ready-made dashboard that students can import into Grafana.
 - `docs/images/`: stores README figures and screenshots.
 - `scripts/setup.sh`: starts the stack.
-- `scripts/publish-sensor-data.sh`: publishes repeated MQTT values for `temp`, `humidity`, and `distance` from inside the `mqtt-client` container.
+- `scripts/publish-sensor-data.sh`: publishes repeated MQTT values for `temp`, `humidity`, `distance`, and `object` from inside the `mqtt-client` container.
 - `archive/`: keeps earlier temperature-only examples.
 
 ## Prerequisites
@@ -369,15 +380,16 @@ Send several values:
 podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "22.5"
 podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
 podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"
+podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"
 ```
 
-After publishing the three values manually, the dashboard should receive the new points:
+After publishing the four values manually, the dashboard should receive the new points:
 
 ![Manual MQTT publishing with Podman Compose](docs/images/publish-mqtt-method-1-manual.png)
 
 Method 2: run the script inside the `mqtt-client` container.
 
-The script publishes 10 rounds of values for the three sensor topics: `temp`, `humidity`, and `distance`.
+The script publishes 10 rounds of values for the four sensor topics: `temp`, `humidity`, `distance`, and `object`.
 
 ```bash
 podman-compose exec mqtt-client sh /usr/local/bin/publish-sensor-data
@@ -421,7 +433,7 @@ SHOW MEASUREMENTS
 SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 5
 ```
 
-You should see the values published to the MQTT topics `temp`, `humidity`, and `distance`.
+You should see the values published to the MQTT topics `temp`, `humidity`, `distance`, and `object`.
 
 ![InfluxDB query showing MQTT sensor data](docs/images/verify-influxdb-mqtt-data.png)
 
@@ -487,11 +499,12 @@ Send several values:
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "22.5"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"
 ```
 
 Method 2: run the script inside the `mqtt-client` container.
 
-The script publishes 10 rounds of values for the three sensor topics: `temp`, `humidity`, and `distance`.
+The script publishes 10 rounds of values for the four sensor topics: `temp`, `humidity`, `distance`, and `object`.
 
 ```bash
 docker compose exec mqtt-client sh /usr/local/bin/publish-sensor-data
@@ -527,7 +540,7 @@ SHOW MEASUREMENTS
 SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 5
 ```
 
-You should see the values published to the MQTT topics `temp`, `humidity`, and `distance`.
+You should see the values published to the MQTT topics `temp`, `humidity`, `distance`, and `object`.
 
 Exit the shell:
 
@@ -632,6 +645,7 @@ The imported dashboard contains:
 - Current temperature.
 - Current humidity.
 - Current distance.
+- Current object detection status.
 
 Publish new MQTT values and refresh the dashboard.
 
@@ -664,7 +678,7 @@ In Phase 2, the Raspberry Pi publishes real sensor values to the MQTT broker run
 
 ### Raspberry Pi sensor setup
 
-![Raspberry Pi setup with temperature, humidity, and distance sensors](docs/images/setup-temp-hum-distance-1.png)
+![Raspberry Pi setup with temperature, humidity, distance, and object detection sensors](docs/images/setup-temp-hum-distance-1.png)
 
 ![Raspberry Pi setup with camera, display, and sensors](docs/images/setup-temp-hum-distance-2.png)
 
@@ -728,6 +742,7 @@ The Raspberry Pi should publish numeric payloads to the same MQTT topics used in
 - `temp`
 - `humidity`
 - `distance`
+- `object`
 
 Example test commands from the Raspberry Pi:
 
@@ -735,6 +750,7 @@ Example test commands from the Raspberry Pi:
 mosquitto_pub -h <computer-ip-address> -p 1883 -t temp -m "24.6"
 mosquitto_pub -h <computer-ip-address> -p 1883 -t humidity -m "57"
 mosquitto_pub -h <computer-ip-address> -p 1883 -t distance -m "42"
+mosquitto_pub -h <computer-ip-address> -p 1883 -t object -m "1"
 ```
 
 The payload must be only a number because Telegraf is configured with `data_format = "value"` and `data_type = "float"`.
@@ -763,6 +779,7 @@ When the Raspberry Pi publishes data, you should see messages such as:
 temp 24.6
 humidity 57
 distance 42
+object 1
 ```
 
 Then refresh Grafana to see the live real-sensor data.
@@ -838,6 +855,7 @@ Open another terminal and publish values:
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"
 ```
 
 Expected output in the subscriber terminal:
@@ -846,6 +864,7 @@ Expected output in the subscriber terminal:
 temp 25
 humidity 58
 distance 45
+object 1
 ```
 
 If you see these messages, MQTT is working.
@@ -883,6 +902,7 @@ Publish a valid test value:
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25.5"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"
 ```
 
 ### 4. Confirm that InfluxDB has data
@@ -900,6 +920,7 @@ time                topic value
 ...                 temp  25.5
 ...                 humidity 58
 ...                 distance 45
+...                 object 1
 ```
 
 If there is no data, restart Telegraf and publish again:
@@ -909,6 +930,7 @@ docker compose restart telegraf
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "26"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "60"
 docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "42"
+docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"
 ```
 
 Then check InfluxDB again:
@@ -1026,6 +1048,7 @@ podman-compose up -d
 | Publish temperature | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t temp -m "25"` |
 | Publish humidity | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t humidity -m "58"` |
 | Publish distance | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t distance -m "45"` |
+| Publish object detection | `podman-compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"` | `docker compose exec mqtt-client mosquitto_pub -h mqtt-broker -p 1883 -t object -m "1"` |
 | Publish 10 rounds with the script | `podman-compose exec mqtt-client sh /usr/local/bin/publish-sensor-data` | `docker compose exec mqtt-client sh /usr/local/bin/publish-sensor-data` |
 | Subscribe to a topic | `podman-compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp` | `docker compose exec mqtt-client mosquitto_sub -h mqtt-broker -p 1883 -t temp` |
 | Query InfluxDB | `podman-compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'` | `docker compose exec influxdb influx -database iot -execute 'SELECT * FROM mqtt_consumer ORDER BY time DESC LIMIT 10'` |
@@ -1057,6 +1080,7 @@ Node-RED can connect to the MQTT broker and subscribe to the same topics used in
 - `temp`
 - `humidity`
 - `distance`
+- `object`
 
 Possible Node-RED activities:
 
